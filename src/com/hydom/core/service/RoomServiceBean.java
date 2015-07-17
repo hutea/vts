@@ -48,9 +48,20 @@ public class RoomServiceBean implements RoomService {
 	}
 
 	@Override
+	public double avgScore(String roomId) {
+		try {
+			double avgscore = this.jdbcTemplate.queryForObject("select AVG(score) from t_comment where courseId = ?",
+					Double.class, roomId);
+			return avgscore;
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
+	@Override
 	public Room findOne(String id) {
 		try {
-			Room room = this.jdbcTemplate.queryForObject("select id, userId,types,nowFlow from t_course where id = ?",
+			Room room = this.jdbcTemplate.queryForObject("select id, userId,types,nowFlow,name from t_course where id = ?",
 					new Object[] { id }, new RowMapper<Room>() {
 						public Room mapRow(ResultSet rs, int rowNum) {
 							try {
@@ -59,7 +70,8 @@ public class RoomServiceBean implements RoomService {
 								room.setUserId(rs.getString("userId"));
 								room.setTypes(rs.getInt("types"));
 								room.setNowFlow(rs.getString("nowFlow"));
-								return room;
+								room.setName(rs.getString("name"));
+								return room; 
 							} catch (Exception e) {
 								e.printStackTrace();
 								return null;

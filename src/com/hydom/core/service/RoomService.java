@@ -29,10 +29,20 @@ public interface RoomService {
 
 	/**
 	 * 设置指定房间的状态：
+	 * 
 	 * @param roomId
-	 * @param status 1正在上课 ；0未上课
+	 * @param status
+	 *            1正在上课 ；0未上课
 	 * @return
 	 */
-public	int setRoomStatus(String roomId, int status);
+	public int setRoomStatus(String roomId, int status);
+
+	/***
+	 * 根据房间ID得到房间评分
+	 * 
+	 * @param roomId
+	 * @return
+	 */
+	public double avgScore(String roomId);
 
 }

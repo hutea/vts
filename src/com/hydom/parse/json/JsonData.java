@@ -12,6 +12,7 @@ public class JsonData {
 	private int type;
 	private String roomid;// 房间id
 	private String roomname;// 房间名
+	private String roomscroe;// 房间评分
 	private String userid;// 用户id
 	private String nickname;// 用户昵称
 	private Boolean isteacher;
@@ -43,6 +44,12 @@ public class JsonData {
 	private JsonUser teacher;
 	private List<JsonUser> students;
 	private List<JsonVideo> roomvideos;
+
+	private String sendNickname; // 发送端用户昵称
+	private String sendUserid; // 发送端用户id
+
+	private String toNickname;// 接收端用户昵称
+	private String toUserid;// 接收端用户id
 
 	public int getType() {
 		return type;
@@ -258,6 +265,46 @@ public class JsonData {
 
 	public void setVideoname(String videoname) {
 		this.videoname = videoname;
+	}
+
+	public String getSendNickname() {
+		return sendNickname;
+	}
+
+	public void setSendNickname(String sendNickname) {
+		this.sendNickname = sendNickname;
+	}
+
+	public String getSendUserid() {
+		return sendUserid;
+	}
+
+	public void setSendUserid(String sendUserid) {
+		this.sendUserid = sendUserid;
+	}
+
+	public String getToNickname() {
+		return toNickname;
+	}
+
+	public void setToNickname(String toNickname) {
+		this.toNickname = toNickname;
+	}
+
+	public String getToUserid() {
+		return toUserid;
+	}
+
+	public void setToUserid(String toUserid) {
+		this.toUserid = toUserid;
+	}
+
+	public String getRoomscroe() {
+		return roomscroe;
+	}
+
+	public void setRoomscroe(String roomscroe) {
+		this.roomscroe = roomscroe;
 	}
 
 	public static void main(String[] args) {

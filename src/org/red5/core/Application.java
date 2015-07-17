@@ -83,11 +83,42 @@ public class Application extends MultiThreadedApplicationAdapter {
 				process_115(jsonData);
 			} else if (jsonData.getType() == 116) {// 图片上传完成 请求
 				process_116(jsonData);
+			} else if (jsonData.getType() == 117) {// 用户之间私聊 请求
+				process_117(jsonData);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		// ISharedObject so = getSharedObject(scope, "sampleSO");
+	}
+
+	private void process_117(JsonData jsonData) {
+		try {
+			IConnection localConn = Red5.getConnectionLocal();
+
+			/** 私聊响应数据 **/
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.setSerializationInclusion(Include.NON_NULL);
+			jsonData.setType(317);
+			String responseData = mapper.writeValueAsString(jsonData);
+
+			Set<IConnection> conns = localConn.getScope().getClientConnections();
+			for (IConnection conn : conns) {
+				User user = (User) conn.getAttribute("user");
+				if (user != null && user.getId().equals(jsonData.getToUserid())) {// 通知接受的用户
+					IServiceCapableConnection sc = (IServiceCapableConnection) conn;
+					log.info("私聊通知接受端 数据 ：" + responseData);
+					sc.invoke("sendToClient", new Object[] { responseData });
+					break;
+				}
+			}
+			IServiceCapableConnection sc = (IServiceCapableConnection) localConn;
+			log.info("私聊通知发送端 数据 ：" + responseData);
+			sc.invoke("sendToClient", new Object[] { responseData });
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void process_116(JsonData jsonData) {
@@ -504,8 +535,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		responseCurrentJsonData.setRoommode(currentRoom.getTypes());
 		responseCurrentJsonData.setRoomid(currentRoom.getId());
 		responseCurrentJsonData.setRoomname(currentRoom.getName());
+		responseCurrentJsonData.setRoomscroe(roomService.avgScore(currentRoom.getId())+"");
 		responseCurrentJsonData.setRoomlivestream(currentRoom.getNowFlow());
 		responseCurrentJsonData.setTeacherid(currentRoom.getUserId());
+		log.info("TEST--->");
 
 		/** 获取视频列表 START **/
 		List<JsonVideo> roomvideos = new ArrayList<JsonVideo>();
@@ -607,8 +640,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 				log.info("stream：" + stream);
 				log.info("model isAppend：" + model + "###" + isAppend);
 				stream.saveAs(rid + "/" + fileId, isAppend);
-				int result = roomService.setCurrentLiveStream(rid, streamName);
-				log.info("更新房间当前直播流名结果：" + result);
+				int resultLive = roomService.setCurrentLiveStream(rid, streamName);
+				int resultRoom = roomService.setRoomStatus(rid, 1);
+				log.info("更新房间当前直播流名结果：" + resultLive);
+				log.info("更新房间状态结果：" + resultRoom);
 				/** 录制视频流 END **/
 
 				Video video = videoService.findOne(fileId);
@@ -650,7 +685,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 		log.info("直播流停止录制：" + stream.getPublishedName());
 		String streamName = stream.getPublishedName();
 		String rid = streamName.substring(0, streamName.indexOf("-"));
-		int result = roomService.setCurrentLiveStream(rid, null);
+		int resultLive = roomService.setCurrentLiveStream(rid, null);
+		int resultRoom = roomService.setRoomStatus(rid, 0);
+		log.info("停止发布，更新房间当前直播流名结果：" + resultLive);
+		log.info("停止发布，更新房间状态结果：" + resultRoom);
 		try {
 			if (streamName.contains("-live-")) {// 录制视频流
 				String videoId = streamName.substring(streamName.indexOf("-live-") + 6, streamName.lastIndexOf("-"));

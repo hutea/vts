@@ -34,7 +34,7 @@
 	<!-- 开发业务bean定义 -->
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-		<property name="url" value="jdbc:mysql://localhost:3326/vt" />
+		<property name="url" value="jdbc:mysql://localhost:3326/vtms" />
 		<property name="username" value="root" />
 		<property name="password" value="123456" />
 		<property name="initialSize" value="10" />
