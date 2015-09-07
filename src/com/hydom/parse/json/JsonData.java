@@ -35,6 +35,8 @@ public class JsonData {
 	private String filename;// 文件名
 	private String filetype;// 文件类型
 
+	private Integer audiolength;// 音频时间
+
 	private String roomlivestream;// 当前直播视频流名
 
 	private Integer sex;//
@@ -305,6 +307,14 @@ public class JsonData {
 
 	public void setRoomscroe(String roomscroe) {
 		this.roomscroe = roomscroe;
+	}
+
+	public Integer getAudiolength() {
+		return audiolength;
+	}
+
+	public void setAudiolength(Integer audiolength) {
+		this.audiolength = audiolength;
 	}
 
 	public static void main(String[] args) {

@@ -1,5 +1,6 @@
 package org.red5.core;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.mina.core.buffer.IoBuffer;
 import org.red5.logging.Red5LoggerFactory;
 import org.red5.server.adapter.MultiThreadedApplicationAdapter;
 import org.red5.server.api.IConnection;
@@ -18,6 +20,8 @@ import org.red5.server.api.stream.IStreamFilenameGenerator;
 import org.red5.server.api.stream.IStreamListener;
 import org.red5.server.api.stream.IStreamPacket;
 import org.red5.server.api.stream.ISubscriberStream;
+import org.red5.server.api.stream.ResourceExistException;
+import org.red5.server.api.stream.ResourceNotFoundException;
 import org.red5.server.net.rtmp.event.Notify;
 import org.red5.server.net.rtmp.message.Constants;
 import org.red5.server.stream.ClientBroadcastStream;
@@ -40,6 +44,7 @@ import com.hydom.core.service.VideoService;
 import com.hydom.parse.json.JsonData;
 import com.hydom.parse.json.JsonUser;
 import com.hydom.parse.json.JsonVideo;
+import com.sun.xml.internal.messaging.saaj.packaging.mime.Header;
 
 public class Application extends MultiThreadedApplicationAdapter {
 	private RoomService roomService;
@@ -85,11 +90,35 @@ public class Application extends MultiThreadedApplicationAdapter {
 				process_116(jsonData);
 			} else if (jsonData.getType() == 117) {// 用户之间私聊 请求
 				process_117(jsonData);
+			} else if (jsonData.getType() == 118) {// 教师踢出学生
+				process_118(jsonData);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		// ISharedObject so = getSharedObject(scope, "sampleSO");
+	}
+
+	private void process_118(JsonData jsonData) {
+		IConnection localConn = Red5.getConnectionLocal();
+		Room room = (Room) localConn.getAttribute("room");
+		User user = (User) localConn.getAttribute("user");
+		if (room == null || !room.getUserId().equals(user.getId())) {
+			return;
+		}
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.setSerializationInclusion(Include.NON_NULL);
+		jsonData.setType(318);
+		try {
+			String responseData = mapper.writeValueAsString(jsonData);
+			log.info("踢出通知所有用户 响应的内容：" + responseData);
+			for (IConnection conn : listUserInRoom(room.getId())) {
+				IServiceCapableConnection sc = (IServiceCapableConnection) conn;
+				sc.invoke("sendToClient", new Object[] { responseData });
+			}
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void process_117(JsonData jsonData) {
@@ -535,7 +564,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		responseCurrentJsonData.setRoommode(currentRoom.getTypes());
 		responseCurrentJsonData.setRoomid(currentRoom.getId());
 		responseCurrentJsonData.setRoomname(currentRoom.getName());
-		responseCurrentJsonData.setRoomscroe(roomService.avgScore(currentRoom.getId())+"");
+		responseCurrentJsonData.setRoomscroe(roomService.avgScore(currentRoom.getId()) + "");
 		responseCurrentJsonData.setRoomlivestream(currentRoom.getNowFlow());
 		responseCurrentJsonData.setTeacherid(currentRoom.getUserId());
 		log.info("TEST--->");
@@ -619,7 +648,24 @@ public class Application extends MultiThreadedApplicationAdapter {
 
 	@Override
 	public void streamPublishStart(IBroadcastStream stream) {
-		log.info("流发布开始：：：：--------》");
+		/** 兼容H264视频 ：代码开始 */
+		/*
+		 * stream.addStreamListener(new IStreamListener() { protected boolean bFirst = true;
+		 * 
+		 * @Override public void packetReceived(IBroadcastStream iBroadcastStream, IStreamPacket packet) { IoBuffer in = packet.getData(); if (packet.getDataType() == 0x09) { byte[] data = new
+		 * byte[in.limit()]; IoBuffer ioBuffer = in.get(data); byte[] foredata = { 0, 0, 0, 1 }; // ioBuffer3.put(data); // buflimit3 += in.limit(); if (bFirst) { // AVCsequence header
+		 * ioBuffer.put(foredata); // 获取sps int spsnum = data[10] & 0x1f; int number_sps = 11; int count_sps = 1; while (count_sps <= spsnum) { int spslen = (data[number_sps] & 0x000000FF) << 8 |
+		 * (data[number_sps + 1] & 0x000000FF); number_sps += 2; ioBuffer.put(data, number_sps, spslen); ioBuffer.put(foredata); number_sps += spslen; count_sps++; } // 获取pps int ppsnum =
+		 * data[number_sps] & 0x1f; int number_pps = number_sps + 1; int count_pps = 1; while (count_pps <= ppsnum) { int ppslen = (data[number_pps] & 0x000000FF) << 8 | data[number_pps + 1] &
+		 * 0x000000FF; number_pps += 2; ioBuffer.put(data, number_pps, ppslen); ioBuffer.put(foredata); number_pps += ppslen; count_pps++; } bFirst = false;
+		 * 
+		 * } else { // AVCNALU int len = 0; int num = 5; ioBuffer.put(foredata); while (num < data.length) { len = (data[num] & 0x000000FF) << 24 | (data[num + 1] & 0x000000FF) << 16 | (data[num + 2]
+		 * & 0x000000FF) << 8 | data[num + 3] & 0x000000FF; num = num + 4; ioBuffer.put(data, num, len); ioBuffer.put(foredata); num = num + len; } } } else if (packet.getDataType() == 0x08) { //
+		 * 这存储处理音频数据 Audio data } } });
+		 */
+		/** 兼容H264视频 ：代码END */
+
+		log.info("流发布开始：：：：-------->");
 		String streamName = stream.getPublishedName();
 
 		log.info("streamName:" + streamName);
@@ -630,6 +676,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		}
 		log.info("通过流名得到房间ID:" + rid);
 		log.info("通过流名得到用户ID:" + uid);
+
 		try {
 			if (streamName.contains("-live-")) {// 录制视频流
 				/** 录制视频流 STRART **/
@@ -640,6 +687,10 @@ public class Application extends MultiThreadedApplicationAdapter {
 				log.info("stream：" + stream);
 				log.info("model isAppend：" + model + "###" + isAppend);
 				stream.saveAs(rid + "/" + fileId, isAppend);
+				//stream.saveAs(System.currentTimeMillis() + "", isAppend);
+
+				log.info("视频流编码格式：" + stream.getCodecInfo().getVideoCodecName());
+				log.info("音频流编码格式：" + stream.getCodecInfo().getAudioCodecName());
 				int resultLive = roomService.setCurrentLiveStream(rid, streamName);
 				int resultRoom = roomService.setRoomStatus(rid, 1);
 				log.info("更新房间当前直播流名结果：" + resultLive);
@@ -665,6 +716,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
 		super.streamPublishStart(stream);
 	}
 

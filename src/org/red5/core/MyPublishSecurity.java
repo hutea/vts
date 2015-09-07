@@ -161,13 +161,9 @@ public class MyPublishSecurity implements IStreamPublishSecurity {
 		String uid = streamName.substring(streamName.indexOf("-") + 1, streamName.indexOf("-live-"));
 		String fileId = streamName.substring(streamName.indexOf("-live-") + 6, streamName.lastIndexOf("-"));
 		char model = streamName.charAt(streamName.length() - 1);
-		System.out.println(rid);
-		System.out.println(uid + "~~");
-		System.out.println(fileId);
-		System.out.println(model + "~~");
 		char m = 0;
-		System.out.println(m==0);
-		boolean isAppend =( m == 0 ? false : true);
+		System.out.println(m == 0);
+		boolean isAppend = (m == 0 ? false : true);
 		System.out.println(isAppend);
 	}
 
