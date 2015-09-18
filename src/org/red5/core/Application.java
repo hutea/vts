@@ -94,6 +94,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				process_118(jsonData);
 			}
 		} catch (Exception e) {
+			log.warn(e.toString());
 			e.printStackTrace();
 		}
 		// ISharedObject so = getSharedObject(scope, "sampleSO");
@@ -104,6 +105,8 @@ public class Application extends MultiThreadedApplicationAdapter {
 		Room room = (Room) localConn.getAttribute("room");
 		User user = (User) localConn.getAttribute("user");
 		if (room == null || !room.getUserId().equals(user.getId())) {
+			log.info("无权踢出用户：" + room == null ? "room is null" : room.getId() + "--" + user == null ? "user is null"
+					: user.getId());
 			return;
 		}
 		ObjectMapper mapper = new ObjectMapper();
@@ -118,6 +121,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			}
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
+			log.warn(e.toString());
 		}
 	}
 
@@ -146,6 +150,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			sc.invoke("sendToClient", new Object[] { responseData });
 
 		} catch (Exception e) {
+			log.warn(e.toString());
 			e.printStackTrace();
 		}
 	}
@@ -172,6 +177,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 			}
 		} catch (Exception e) {
+			log.warn(e.toString());
 			e.printStackTrace();
 		}
 	}
@@ -187,6 +193,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				sc.invoke("sendToClient", new Object[] { responseData });
 			}
 		} catch (Exception e) {
+			log.warn(e.toString());
 			e.printStackTrace();
 		}
 	}
@@ -208,6 +215,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				sc.invoke("sendToClient", new Object[] { responseData });
 			}
 		} catch (JsonProcessingException e) {
+			log.warn(e.toString());
 			e.printStackTrace();
 		}
 	}
@@ -242,6 +250,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			IServiceCapableConnection sc = (IServiceCapableConnection) localConn;
 			sc.invoke("sendToClient", new Object[] { responseData });
 		} catch (Exception e) {
+			log.warn(e.toString());
 			e.printStackTrace();
 		}
 	}
@@ -263,6 +272,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				sc.invoke("sendToClient", new Object[] { responseData });
 			}
 		} catch (JsonProcessingException e) {
+			log.warn(e.toString());
 			e.printStackTrace();
 		}
 
@@ -285,6 +295,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				sc.invoke("sendToClient", new Object[] { responseData });
 			}
 		} catch (JsonProcessingException e) {
+			log.warn(e.toString());
 			e.printStackTrace();
 		}
 
@@ -307,6 +318,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				sc.invoke("sendToClient", new Object[] { responseData });
 			}
 		} catch (JsonProcessingException e) {
+			log.warn(e.toString());
 			e.printStackTrace();
 		}
 
@@ -345,6 +357,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 						sc.invoke("sendToClient", new Object[] { responseData });
 						break;
 					} catch (JsonProcessingException e) {
+						log.warn(e.toString());
 						e.printStackTrace();
 					}
 				}
@@ -386,6 +399,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 						sc.invoke("sendToClient", new Object[] { responseData });
 						break;
 					} catch (JsonProcessingException e) {
+						log.warn(e.toString());
 						e.printStackTrace();
 					}
 				}
@@ -448,6 +462,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			log.info("publis'name:" + stream.getPublishedName());
 			stream.saveAs(roomId + "/" + fileName, true);
 		} catch (Exception e) {
+			log.warn(e.toString());
 			e.printStackTrace();
 		}
 		/** 录制视频流 END **/
@@ -464,6 +479,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 					sc.invoke("sendToClient", new Object[] { responseData });
 				}
 			} catch (JsonProcessingException e) {
+				log.warn(e.toString());
 				e.printStackTrace();
 			}
 		}
@@ -521,6 +537,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 						// sc.close();
 						sc.invoke("sendToClient", new Object[] { responseData });
 					} catch (JsonProcessingException e) {
+						log.warn(e.toString());
 						e.printStackTrace();
 					}
 				} else {
@@ -553,6 +570,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 						IServiceCapableConnection sc = (IServiceCapableConnection) conn;
 						sc.invoke("sendToClient", new Object[] { responseData });
 					} catch (JsonProcessingException e) {
+						log.warn(e.toString()); 
 						e.printStackTrace();
 					}
 				}
@@ -615,6 +633,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 			IServiceCapableConnection sc = (IServiceCapableConnection) localConn;
 			sc.invoke("sendToClient", new Object[] { responseData });
 		} catch (JsonProcessingException e) {
+			log.warn(e.toString());
 			e.printStackTrace();
 		}
 	}
@@ -687,7 +706,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				log.info("stream：" + stream);
 				log.info("model isAppend：" + model + "###" + isAppend);
 				stream.saveAs(rid + "/" + fileId, isAppend);
-				//stream.saveAs(System.currentTimeMillis() + "", isAppend);
+				// stream.saveAs(System.currentTimeMillis() + "", isAppend);
 
 				log.info("视频流编码格式：" + stream.getCodecInfo().getVideoCodecName());
 				log.info("音频流编码格式：" + stream.getCodecInfo().getAudioCodecName());
@@ -714,6 +733,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 			}
 		} catch (Exception e) {
+			log.warn(e.toString());
 			e.printStackTrace();
 		}
 
@@ -757,6 +777,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 			}
 		} catch (JsonProcessingException e) {
+			log.warn(e.toString());
 			e.printStackTrace();
 		}
 		super.streamRecordStop(stream);
@@ -796,6 +817,7 @@ public class Application extends MultiThreadedApplicationAdapter {
 				}
 			}
 		} catch (Exception e) {
+			log.warn(e.toString());
 			e.printStackTrace();
 		}
 		super.disconnect(conn, scope);
